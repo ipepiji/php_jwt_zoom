@@ -4,19 +4,15 @@ include('../api/main.php');
 include('../jwt/validate.php');
 include('create_token.php');
 
-$token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IjU4WEpBdGpfUkRLWnVManR3TmdvSVEiLCJleHAiOjE2MDcwOTYwNDksImlhdCI6MTYwNzA5MDY1MH0.5k2flLEa-DvlDGJFZDhgw1RpixyqcA15gCIFoG4xK0k";
-$current = 1607091193;
+$token = $_POST['token'];
+$current = $_POST['current'];
 
 try {
     $response = validateToken($token, $current);
 } catch (Exception $e) {
     if ($e->getMessage() === "Token has expired") {
-        $token = generateJWT($current);
-        $response = json_encode(
-            array(
-                "new_token" => $token
-            )
-        );
+        $new_token = generateJWT($current);
+        $response = validateToken($new_token, $current);
     } else {
         $response = json_encode(
             array(
