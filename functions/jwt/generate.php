@@ -2,7 +2,7 @@
 
 function createToken($payloads)
 {
-    include('secret_key.php');
+    include('env.php');
 
     // Secret Key
     $secret = $secret_key;

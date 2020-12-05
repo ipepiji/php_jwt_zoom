@@ -4,7 +4,7 @@ include('base64UrlEncode.php');
 
 function validateToken($token, $current)
 {
-    include('secret_key.php');
+    include('env.php');
 
     // Get the secret key
     $secret = $secret_key;

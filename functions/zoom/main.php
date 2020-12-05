@@ -1,36 +1,64 @@
 <?php
 
 include('../api/main.php');
-include('../jwt/validate.php');
-include('create_token.php');
+include('../jwt/env.php');
 
 $token = $_POST['token'];
-$current = $_POST['current'];
+$refresh_token = $_POST['refresh_token'];
+
+$topic = $_POST['topic'];
+$start_time = $_POST['start_time'];
+$duration = $_POST['duration'];
+$password = $_POST['password'];
+$timezone = $_POST['timezone'];
 
 try {
-    $response = validateToken($token, $current);
-} catch (Exception $e) {
-    if ($e->getMessage() === "Token has expired") {
-        $new_token = generateJWT($current);
-        $response = validateToken($new_token, $current);
-    } else {
-        $response = json_encode(
-            array(
-                "error" => $e->getMessage()
-            )
-        );
+    $response = zoom_create_meeting($token, $topic, $start_time, $duration, $password, $timezone);
+    if (isset(json_decode($response, true)['code'])) {
+        echo "refresh_token";
+        $new_token = zoom_refresh_token($refresh_token, $client_id, $secret_key);
+        $response = zoom_create_meeting($new_token, $topic, $start_time, $duration, $password, $timezone);
     }
+} catch (Exception $e) {
+    $response = json_encode(
+        array(
+            "error" => $e->getMessage()
+        )
+    );
 }
 
 echo $response;
 
-// $zoom_headers = array(
-//     "Content-Type" => "application/json",
-//     "Authorization" => "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IjU4WEpBdGpfUkRLWnVManR3TmdvSVEiLCJleHAiOjE2MDcwODI0NDcsImlhdCI6MTYwNzA3NzA0OH0.eDZd5QVBV25gZ-VYkaR9NLA8is2627Ma2aYNgQHx80Q"
-// );
+function zoom_create_meeting($token, $topic, $start_time, $duration, $password, $timezone)
+{
+    $url = "https://api.zoom.us/v2/users/me/meetings";
+    $headers = array(
+        "Content-Type: application/json",
+        "Authorization: Bearer $token"
+    );
+    $data = array(
+        "topic" => $topic,
+        "type" => 2,
+        "start_time" => $start_time,
+        "duration" => $duration,
+        "password" => $password,
+        "timezone" => $timezone,
+        "settings" => array(
+            "mute_upon_entry" => true,
+            "join_before_host" => true,
+            "registrants_email_notification" => true
+        )
+    );
+    $result = requestAPI('POST', $url, $headers, $data);
+    return $result;
+}
 
-// $zoom_data = array(
-//     "user" => "ulala",
-// );
-
-// $zoom_data = requestAPI('POST', 'https://api.zoom.us/v2/users/{userId}/meetings', $zoom_headers, $zoom_data);
+function zoom_refresh_token($refresh_token, $client_id, $secret_key)
+{
+    $url = "https://zoom.us/oauth/token?grant_type=refresh_token&refresh_token=$refresh_token";
+    $headers = array(
+        "Authorization: Basic " . base64_encode($client_id . ':' . $secret_key)
+    );
+    $result = requestAPI('POST', $url, $headers, null);
+    return $result;
+}
