@@ -35,7 +35,7 @@
             $refresh_token = null;
         }
 
-        if ($token)
+        if ($token && $refresh_token)
             echo "<div id='token' style='text-align: center; margin: auto; color: blue;'>" . $token . "</div><br><div id='refresh_token' style='text-align: center; margin: auto; color: red;'>" . $refresh_token . "</div>";
         else
             echo "<a href='https://zoom.us/oauth/authorize?response_type=code&client_id=nMrrmpxITEGF9ld0OkWN2w&redirect_uri=$redirect_url' style='width:200px; height:200px; position: fixed; top: 50%; left: 50%; margin-top: -100px; margin-left: -100px;'><button class='btn btn-success'>Login Zoom</button></a>";
