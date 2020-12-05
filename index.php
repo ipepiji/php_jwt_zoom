@@ -13,30 +13,35 @@
     include('functions/jwt/env.php');
     include('functions/api/main.php');
 
-    $code = $_GET['code'];
     $redirect_url = "http://localhost/zoom-api-php/index.php";
 
-    try {
-        $response = get_token($client_id, $secret_key, $code, $redirect_url);
-    } catch (Exception $e) {
-        $response = json_encode(
-            array(
-                "error" => $e->getMessage()
-            )
-        );
-    }
-    if (isset(json_decode($response, true)['access_token'])) {
-        $token = json_decode($response, true)['access_token'];
-        $refresh_token = json_decode($response, true)['refresh_token'];
-    } else {
-        $token = null;
-        $refresh_token = null;
-    }
+    if (isset($_GET['code'])) {
+        $code = $_GET['code'];
 
-    if ($token)
-        echo "<div id='token' style='text-align: center; margin: auto; color: blue;'>" . $token . "</div><br><div id='refresh_token' style='text-align: center; margin: auto; color: red;'>" . $refresh_token . "</div>";
-    else
+        try {
+            $response = get_token($client_id, $secret_key, $code, $redirect_url);
+        } catch (Exception $e) {
+            $response = json_encode(
+                array(
+                    "error" => $e->getMessage()
+                )
+            );
+        }
+        if (isset(json_decode($response, true)['access_token'])) {
+            $token = json_decode($response, true)['access_token'];
+            $refresh_token = json_decode($response, true)['refresh_token'];
+        } else {
+            $token = null;
+            $refresh_token = null;
+        }
+
+        if ($token)
+            echo "<div id='token' style='text-align: center; margin: auto; color: blue;'>" . $token . "</div><br><div id='refresh_token' style='text-align: center; margin: auto; color: red;'>" . $refresh_token . "</div>";
+        else
+            echo "<a href='https://zoom.us/oauth/authorize?response_type=code&client_id=nMrrmpxITEGF9ld0OkWN2w&redirect_uri=$redirect_url' style='width:200px; height:200px; position: fixed; top: 50%; left: 50%; margin-top: -100px; margin-left: -100px;'><button class='btn btn-success'>Login Zoom</button></a>";
+    } else {
         echo "<a href='https://zoom.us/oauth/authorize?response_type=code&client_id=nMrrmpxITEGF9ld0OkWN2w&redirect_uri=$redirect_url' style='width:200px; height:200px; position: fixed; top: 50%; left: 50%; margin-top: -100px; margin-left: -100px;'><button class='btn btn-success'>Login Zoom</button></a>";
+    }
 
     function get_token($client_id, $secret_key, $code, $redirect_url)
     {
