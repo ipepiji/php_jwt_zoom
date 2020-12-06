@@ -76,7 +76,6 @@ function zoom_delete_meeting($access_token, $meeting_id)
         "Authorization: Bearer $access_token"
     );
     $result = requestAPI('DELETE', $url, $headers, null);
-    echo $result;
     return $result;
 }
 
