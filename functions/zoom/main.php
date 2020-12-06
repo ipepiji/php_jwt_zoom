@@ -4,7 +4,6 @@ include('../api/main.php');
 include('../jwt/env.php');
 
 $token = $_POST['token'];
-$refresh_token = $_POST['refresh_token'];
 
 $topic = $_POST['topic'];
 $start_time = $_POST['start_time'];
@@ -14,12 +13,14 @@ $timezone = $_POST['timezone'];
 
 try {
     $response = zoom_create_meeting($token, $topic, $start_time, $duration, $password, $timezone);
-    if (isset(json_decode($response, true)['code'])) {
-        if (json_decode($response, true)['message'] === "Access token is expired.") {
-            $new_token = zoom_refresh_token($refresh_token, $client_id, $secret_key);
-            $response = zoom_create_meeting($new_token, $topic, $start_time, $duration, $password, $timezone);
-        }
-    }
+    // $meeting_id = json_decode($response, true)['id'];
+    // $response = zoom_delete_meeting($token, $meeting_id);
+    // if (isset(json_decode($response, true)['code'])) {
+    //     if (json_decode($response, true)['message'] === "Access token is expired.") {
+    //         $new_token = zoom_refresh_token($refresh_token, $client_id, $secret_key);
+    //         $response = zoom_create_meeting($new_token, $topic, $start_time, $duration, $password, $timezone);
+    //     }
+    // }
 } catch (Exception $e) {
     $response = json_encode(
         array(
@@ -51,6 +52,17 @@ function zoom_create_meeting($token, $topic, $start_time, $duration, $password, 
         )
     );
     $result = requestAPI('POST', $url, $headers, $data);
+    return $result;
+}
+
+function zoom_delete_meeting($token, $meeting_id)
+{
+    $url = "https://api.zoom.us/v2/meetings/$meeting_id";
+    $headers = array(
+        "Authorization: Bearer $token"
+    );
+    $result = requestAPI('DELETE', $url, $headers, null);
+    echo $result;
     return $result;
 }
 

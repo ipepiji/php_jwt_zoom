@@ -13,6 +13,9 @@ function requestAPI($method, $url, $headers, $data)
             if ($data)
                 curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
             break;
+        case "DELETE":
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+            break;
         default:
             if ($data)
                 $url = sprintf("%s?%s", $url, http_build_query($data));
