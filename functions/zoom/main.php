@@ -15,9 +15,10 @@ $timezone = $_POST['timezone'];
 try {
     $response = zoom_create_meeting($token, $topic, $start_time, $duration, $password, $timezone);
     if (isset(json_decode($response, true)['code'])) {
-        echo "refresh_token" . $response;
-        $new_token = zoom_refresh_token($refresh_token, $client_id, $secret_key);
-        $response = zoom_create_meeting($new_token, $topic, $start_time, $duration, $password, $timezone);
+        if (json_decode($response, true)['message'] === "Access token is expired.") {
+            $new_token = zoom_refresh_token($refresh_token, $client_id, $secret_key);
+            $response = zoom_create_meeting($new_token, $topic, $start_time, $duration, $password, $timezone);
+        }
     }
 } catch (Exception $e) {
     $response = json_encode(
